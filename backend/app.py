@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import time
 from flask_cors import CORS
-from core.financial_goal import FinancialGoal
+from backend.core.financial_goal import FinancialGoal
 
 app = Flask(__name__, static_folder='../frontend')
 CORS(app)
