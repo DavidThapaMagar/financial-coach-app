@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-1:#0f172a;
+      --bg-2:#1e293b;
+      --card:#0b1220cc;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --primary:#22c55e;
+      --primary-hover:#16a34a;
+      --input:#111827;
+      --border:#334155;
+      --danger:#ef4444;
+      --success:#22c55e;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% -20%, #1d4ed8 0%, transparent 50%),
+        radial-gradient(1000px 500px at 100% 0%, #059669 0%, transparent 45%),
+        linear-gradient(160deg,var(--bg-1),var(--bg-2));
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px 16px;
+    }
+    .app{
+      width:100%;
+      max-width:920px;
+      background:var(--card);
+      border:1px solid #1f2937;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(8px);
+      overflow:hidden;
+    }
+    .header{padding:28px 28px 12px;}
+    .title{margin:0;font-size:clamp(1.4rem,2.6vw,2rem);font-weight:800;letter-spacing:-.02em;}
+    .subtitle{margin:8px 0 0;color:var(--muted);font-size:.98rem;}
+    .content{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      padding:18px 28px 28px;
+    }
+    .panel{
+      background:rgba(15,23,42,.55);
+      border:1px solid #233046;
+      border-radius:14px;
+      padding:16px;
+    }
+    .panel h2{margin:0 0 12px;font-size:1rem;color:#cbd5e1;font-weight:700;}
+    .field{margin-bottom:12px;}
+    label{display:block;font-size:.9rem;color:#cbd5e1;margin-bottom:6px;font-weight:600;}
+    input{
+      width:100%;
+      padding:11px 12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--input);
+      color:var(--text);
+      outline:none;
+      transition:.2s border-color,.2s box-shadow;
+    }
+    input::placeholder{color:#6b7280}
+    input:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.2);}
+    .actions{display:flex;gap:10px;margin-top:10px;}
+    button{
+      border:none;
+      border-radius:10px;
+      padding:11px 14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s transform,.2s opacity,.2s background;
+    }
+    .btn-primary{background:var(--primary);color:#052e16;flex:1;}
+    .btn-primary:hover{background:var(--primary-hover)}
+    .btn-primary:active{transform:translateY(1px)}
+    .btn-secondary{background:#1f2937;color:#e5e7eb;}
+    .btn-secondary:hover{opacity:.9}
+    .result{min-height:220px;display:flex;flex-direction:column;gap:10px;}
+    .result-item{background:#0b1324;border:1px solid #263246;border-radius:10px;padding:12px;}
+    .result-item .k{font-size:.82rem;color:var(--muted);margin-bottom:4px;}
+    .result-item .v{font-size:1.05rem;font-weight:700;letter-spacing:-.01em;}
+    .good .v{color:var(--success)}
+    .bad .v{color:var(--danger)}
+    .hint{color:var(--muted);font-size:.9rem;line-height:1.4;}
+    @media (max-width: 820px){
+      .content{grid-template-columns:1fr;padding:16px;}
+      .header{padding:20px 16px 8px}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1 class="title">Financial Coach</h1>
+      <p class="subtitle">Enter your monthly numbers to get a quick financial health snapshot.</p>
+    </header>
+
+    <section class="content">
+      <div class="panel">
+        <h2>Your Inputs</h2>
+
+        <div class="field">
+          <label for="income">Monthly Income ($)</label>
+          <input id="income" type="number" placeholder="e.g. 5000" />
+        </div>
+
+        <div class="field">
+          <label for="expenses">Monthly Expenses ($)</label>
+          <input id="expenses" type="number" placeholder="e.g. 3200" />
+        </div>
+
+        <div class="field">
+          <label for="savings">Current Savings ($)</label>
+          <input id="savings" type="number" placeholder="e.g. 10000" />
+        </div>
+
+        <div class="field">
+          <label for="debt">Total Debt ($)</label>
+          <input id="debt" type="number" placeholder="e.g. 8000" />
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" onclick="calculate()">Analyze</button>
+          <button class="btn-secondary" onclick="fillSample()">Sample</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Results</h2>
+        <div id="result" class="result">
+          <p class="hint">Your summary will appear here after clicking <strong>Analyze</strong>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fmt = (n) =>
+      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+        .format(Number(n || 0));
+
+    function fillSample(){
+      income.value = 5000;
+      expenses.value = 3200;
+      savings.value = 10000;
+      debt.value = 8000;
+    }
+
+    function calculate(){
+      const incomeVal = Number(document.getElementById('income').value || 0);
+      const expensesVal = Number(document.getElementById('expenses').value || 0);
+      const savingsVal = Number(document.getElementById('savings').value || 0);
+      const debtVal = Number(document.getElementById('debt').value || 0);
+
+      if ([incomeVal, expensesVal, savingsVal, debtVal].some(v => v < 0)) {
+        result.innerHTML = `<p class="hint" style="color:#fca5a5">Please use non-negative values.</p>`;
+        return;
+      }
+
+      const monthlyLeft = incomeVal - expensesVal;
+      const debtToIncome = incomeVal > 0 ? (debtVal / (incomeVal * 12)) * 100 : 0;
+      const monthsEmergencyFund = expensesVal > 0 ? savingsVal / expensesVal : 0;
+
+      result.innerHTML = `
+        <div class="result-item ${monthlyLeft >= 0 ? 'good' : 'bad'}">
+          <div class="k">Monthly Cash Flow</div>
+          <div class="v">${fmt(monthlyLeft)}</div>
+        </div>
+
+        <div class="result-item ${debtToIncome <= 35 ? 'good' : 'bad'}">
+          <div class="k">Debt-to-Income (annualized)</div>
+          <div class="v">${debtToIncome.toFixed(1)}%</div>
+        </div>
+
+        <div class="result-item ${monthsEmergencyFund >= 3 ? 'good' : 'bad'}">
+          <div class="k">Emergency Fund Coverage</div>
+          <div class="v">${monthsEmergencyFund.toFixed(1)} months</div>
+        </div>
+
+        <p class="hint">
+          Tip: Aim for positive monthly cash flow, debt-to-income under ~35%, and 3–6 months emergency savings.
+        </p>
+      `;
+    }
+  </script>
+</body>
+</html>
